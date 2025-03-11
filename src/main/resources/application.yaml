@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: klktaccouting
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    title: My API
+    description: API cho ứng dụng của tôi
+    contact:
+      name: Your Name
+      email: your.email@example.com
+      url: https://example.com
+  swagger-ui:
+    path: /swagger-ui/index.html
+
+database:
+  connections:
+    - name: authdb
+      type: mysql
+      url: jdbc:mysql://localhost:3306/authdb
+      username: root
+      password: secret
+      initializePool: false
+
+      maximumPoolSize: 15
+      minimumIdle: 3
+      idleTimeout: 30000
+      maxLifetime: 1800000
+      connectionTimeout: 30000
+      autoCommit: false
+      poolName: authdb-pool
+      readOnly: false
+      driverClassName: com.mysql.cj.jdbc.Driver
+
+    - name: businessdb
+      type: postgres
+      url: jdbc:postgresql://localhost:5432/postgres
+      username: postgres
+      password: Postgres#123
+      initializePool: true
+
+      maximumPoolSize: 10
+      minimumIdle: 2
+      idleTimeout: 45000
+      maxLifetime: 2000000
+      connectionTimeout: 35000
+      autoCommit: true
+      poolName: businessdb-pool
+      readOnly: false
+      driverClassName: org.postgresql.Driver
+

@@ -1,0 +1,46 @@
+[
+  {
+    "api_router": "/api/cate/update/{tableName}/{id}",
+    "method": "PUT",
+    "schema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "required": ["o_org_id", "id"],
+      "properties": {
+        "o_org_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 36
+        },
+        "u_uuid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 36
+        },
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      }
+    },
+    "example": {
+      "id": 1,
+      "o_org_id": "550e8400-e29b-41d4-a716-446655440000",
+      "u_uuid": "550e8400-e29b-41d4-a716-446655440000"
+    },
+    "output_200": {
+      "u_uuid": "3b4b69cd-4894-4a59-b659-80ec4610d644",
+      "u_username": "maiphuonghoang",
+      "r_name": "Admin",
+      "p_id": 1,
+      "p_uuid": "7f34c57c-b222-4c29-a3cd-e54c704828b6",
+      "p_mode": "all(api-menu)"
+    },
+    "output_not_200": {
+      "error_code": "999",
+      "err_msg": "Error occurred",
+      "p_uuid": "7f34c57c-b222-4c29-a3cd-e54c704828b6"
+    }
+  }
+]

@@ -3,59 +3,61 @@ package org.klkt.klktaccouting.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import org.klkt.klktaccouting.model.KMetadata;
-import org.klkt.klktaccouting.repository.CategoryMetadataRepository;
+import org.klkt.klktaccouting.core.database.rdbms.IDatabaseExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
+@DependsOn("databaseExecutorImpl")
 @Service
-public class CategoryService {
+public class KLKTCateService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(KLKTCateService.class);
+    private final Supplier<IDatabaseExecutor> businessDbExecutor;
+
+    private IDatabaseExecutor dbExecutor;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private CategoryMetadataRepository categoryMetadataRepository;
-
-    public KMetadata getMetadataByTableName(String tableName) {
-        return categoryMetadataRepository.findByTableName(tableName)
-                .orElseThrow(() -> new RuntimeException("Table not found"));
+    public KLKTCateService(Supplier<IDatabaseExecutor> businessDbExecutor) {
+        this.businessDbExecutor = businessDbExecutor;
+        this.dbExecutor = this.businessDbExecutor.get();
     }
 
-    public JsonNode getAllTables() {
-        ObjectMapper mapper = new ObjectMapper(); // Tạo ObjectMapper để làm việc với JSON
+    public synchronized IDatabaseExecutor getDbExecutor() {
+        if (dbExecutor == null) {
+            dbExecutor = businessDbExecutor.get();
+        }
+        return dbExecutor;
+    }
 
-        // Tạo một ArrayNode để chứa các đối tượng JSON
-        ArrayNode arrayNode = mapper.createArrayNode();
+    public JsonNode getMetadataByTableName(String tableName) throws SQLException {
+        JsonNode metadatas = this.dbExecutor.executeQueryToJson(
+                "SELECT * FROM k_metadata where table_name= ?",
+                Map.of("table_name", tableName));
 
-        // Sử dụng stream() để chuyển đổi danh sách CategoryMetadata
-        categoryMetadataRepository.findAll()
-                .stream()
-                .map(metadata -> {
-                    // Tạo ObjectNode cho mỗi phần tử metadata
-                    return mapper.createObjectNode()
-                            .put("tableName", metadata.getTableName())
-                            .put("tableDesc", metadata.getTableDesc());
-                })
-                .forEach(arrayNode::add); // Thêm mỗi ObjectNode vào ArrayNode
+        return metadatas.isEmpty() ? null : metadatas.get(0);
+    }
 
-        return arrayNode; // Trả về JsonNode
+    public JsonNode getAllTables() throws SQLException {
+        JsonNode jsonNode = this.dbExecutor.executeQueryToJson("select * from k_metadata", null);
+        return jsonNode;
     }
 
     public Map<String, List<Map<String, Object>>> getDropdownDataFromTable(String tableName)
             throws Exception {
 
-        KMetadata metadata = getMetadataByTableName(tableName);
-        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode metadata = this.getMetadataByTableName(tableName);
+
         // Parse searchable_columns từ cột JSON
-        List<Map<String, Object>> dropDownColumns = new ObjectMapper().readValue(metadata.getColumnDropdownSources(), List.class);
+        List<Map<String, Object>> dropDownColumns =
+                new ObjectMapper().readValue(metadata.get("column_dropdown_sources").toString(), List.class);
 
         // Lấy giá trị dropdown từ các bảng khác nhau
         Map<String, List<Map<String, Object>>> dropdownValues = new HashMap<>();
@@ -65,7 +67,7 @@ public class CategoryService {
                 String valueColumn = (String) column.get("value_column");
                 String labelColumn = (String) column.get("label_column");
                 String query = String.format("SELECT %s as id, %s as name FROM %s", valueColumn, labelColumn, sourceTable);
-                List<Map<String, Object>> dropdownData = jdbcTemplate.queryForList(query);
+                List<Map<String, Object>> dropdownData = this.dbExecutor.executeQuery(query, null);
                 dropdownValues.put((String) column.get("name"), dropdownData);
             }
         }
@@ -73,17 +75,17 @@ public class CategoryService {
         return dropdownValues;
     }
 
-    public List<Map<String, Object>> getDropdownDataFromTable(String tableName, String valueColumn, String labelColumn) {
+    public List<Map<String, Object>> getDropdownDataFromTable(String tableName, String valueColumn, String labelColumn)
+            throws SQLException {
         String query = String.format("SELECT %s, %s FROM %s", valueColumn, labelColumn, tableName);
-        return jdbcTemplate.queryForList(query);
+        return this.dbExecutor.executeQuery(query, null);
     }
 
-    // Lấy dữ liệu dropdown từ các bảng liên quan
     public Map<String, List<Map<String, Object>>> getDropdownData(String tableName)
             throws Exception {
-        KMetadata metadata = getMetadataByTableName(tableName);
+        JsonNode metadata = this.getMetadataByTableName(tableName);
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode dropdownSources = objectMapper.readTree(metadata.getColumnDropdownSources());
+        JsonNode dropdownSources = objectMapper.readTree(metadata.get("column_dropdown_sources").toString());
         Map<String, List<Map<String, Object>>> dropdownValues = new HashMap<>();
 
         dropdownSources.fields().forEachRemaining(entry -> {
@@ -91,15 +93,20 @@ public class CategoryService {
             String sourceTable = entry.getValue().asText();
 
             String query = "SELECT id, name FROM " + sourceTable;
-            List<Map<String, Object>> values = jdbcTemplate.queryForList(query);
-            dropdownValues.put(columnName, values);
+            try {
+                List<Map<String, Object>> values = this.dbExecutor.executeQuery(query, null);
+                dropdownValues.put(columnName, values);
+            } catch (SQLException e) {
+                // Handle the exception or log it
+                LOGGER.error("Error executing query for dropdown data: {}", e.getMessage(), e);
+            }
         });
 
         return dropdownValues;
     }
 
     // Tạo mới record
-    public int createRecord(String tableName, Map<String, Object> data) {
+    public int createRecord(String tableName, Map<String, Object> data) throws SQLException {
         StringBuilder queryBuilder = new StringBuilder("INSERT INTO ");
         queryBuilder.append(tableName).append(" (");
         StringBuilder valueBuilder = new StringBuilder("VALUES (");
@@ -113,59 +120,54 @@ public class CategoryService {
         valueBuilder.setLength(valueBuilder.length() - 1);
 
         queryBuilder.append(") ").append(valueBuilder).append(")");
-        return jdbcTemplate.update(queryBuilder.toString());
+        return this.dbExecutor.executeNonQuery(queryBuilder.toString(), null);
     }
 
     // Hàm tìm kiếm dựa trên điều kiện động
-    public List<Map<String, Object>> searchRecords(String tableName, Map<String, Object> conditions) {
+    public List<Map<String, Object>> searchRecords(String tableName, Map<String, Object> conditions) throws SQLException {
         StringBuilder queryBuilder = new StringBuilder("SELECT * FROM ").append(tableName).append(" WHERE 1=1");
 
         conditions.forEach((column, value) -> {
             queryBuilder.append(" AND ").append(column).append(" ILIKE '%").append(value).append("%'");
         });
 
-        return jdbcTemplate.queryForList(queryBuilder.toString());
+        return this.dbExecutor.executeQuery(queryBuilder.toString(), null);
     }
 
-    // Hàm tìm kiếm dựa trên điều kiện động và cột cấu hình cho phép tìm kiếm
     public List<Map<String, Object>> searchRecords(String tableName, String searchQuery)
             throws Exception {
-        KMetadata metadata = getMetadataByTableName(tableName);
+        JsonNode metadata = this.getMetadataByTableName(tableName);
         ObjectMapper objectMapper = new ObjectMapper();
-        List<String> listColumnsSearch
-                = objectMapper.readValue(metadata.getColumnSearchs(), new TypeReference<>() {
+        List<String> listColumnsSearch = objectMapper.readValue(metadata.get("column_searchs").toString(), new TypeReference<>() {
         });
 
-        String sql = "SELECT * FROM " + tableName + " WHERE 1=1";// name ILIKE ?";
-        List<String> lstQuery = new ArrayList<>();
+        String sql = "SELECT * FROM " + tableName + " WHERE 1=1";
+        Map<String, Object> params = new HashMap<>();
 
         if (listColumnsSearch != null && !listColumnsSearch.isEmpty()) {
             sql += " AND (";
             for (int i = 0; i < listColumnsSearch.size(); i++) {
                 String column = listColumnsSearch.get(i);
-                // Thêm điều kiện ILIKE với cột tương ứng
-                sql += column + " ILIKE ?";
+                sql += column + " ILIKE ?" + i;
 
-                // Thêm từ khóa OR giữa các điều kiện, trừ điều kiện cuối cùng
                 if (i < listColumnsSearch.size() - 1) {
                     sql += " OR ";
                 }
-                lstQuery.add("%" + searchQuery + "%");
+                params.put(column, "%" + searchQuery + "%");
             }
-            sql += ")"; // Đóng ngoặc sau các điều kiện OR
-
+            sql += ")";
         }
 
-        return jdbcTemplate.queryForList(sql, (Object[]) lstQuery.toArray(new String[0]));
+        return this.dbExecutor.executeQuery(sql, params);
     }
 
     // Lấy tất cả record
-    public List<Map<String, Object>> getAllRecords(String tableName) {
-        return jdbcTemplate.queryForList("SELECT * FROM " + tableName);
+    public List<Map<String, Object>> getAllRecords(String tableName) throws SQLException {
+        return this.dbExecutor.executeQuery("SELECT * FROM " + tableName, null);
     }
 
     // Update record
-    public int updateRecord(String tableName, Map<String, Object> data, Long id) {
+    public int updateRecord(String tableName, Map<String, Object> data, Long id) throws SQLException {
         StringBuilder queryBuilder = new StringBuilder("UPDATE ").append(tableName).append(" SET ");
 
         data.forEach((column, value) -> {
@@ -174,19 +176,19 @@ public class CategoryService {
 
         queryBuilder.setLength(queryBuilder.length() - 1);
         queryBuilder.append(" WHERE id = ?");
-        return jdbcTemplate.update(queryBuilder.toString(), id);
+        return this.dbExecutor.executeNonQuery(queryBuilder.toString(), Map.of("id", id));
     }
 
     public int updateRecord(String tableName, Map<String, Object> data)
             throws Exception {
-        KMetadata metadata = getMetadataByTableName(tableName);
+        JsonNode metadata = this.getMetadataByTableName(tableName);
         ObjectMapper objectMapper = new ObjectMapper();
         List<String> primaryKeys
-                = objectMapper.readValue(metadata.getColumnPrimarys(), new TypeReference<>() {
+                = objectMapper.readValue(metadata.get("column_primarys").toString(), new TypeReference<>() {
         });
         // Xây dựng câu truy vấn `UPDATE`
         StringBuilder queryBuilder = new StringBuilder("UPDATE " + tableName + " SET ");
-        List<Object> params = new ArrayList<>();
+        Map<String, Object> params = new HashMap<>();
 
         // Thêm các cột cần cập nhật
         data.forEach((key, value) -> {
@@ -208,49 +210,48 @@ public class CategoryService {
         queryBuilder.append(" WHERE ");
         primaryKeys.forEach(primaryKey -> {
             queryBuilder.append(primaryKey).append(" = ? AND ");
-            params.add(data.get(primaryKey));
+            params.put(primaryKey, data.get(primaryKey));
         });
 
         // Xóa " AND " cuối cùng
         queryBuilder.delete(queryBuilder.length() - 5, queryBuilder.length());
 
         // Thực thi truy vấn
-        int r = jdbcTemplate.update(queryBuilder.toString(), params.toArray());
+        int r = this.dbExecutor.executeNonQuery(queryBuilder.toString(), params);
         return r;
     }
 
     // Xóa record
-    public int deleteRecord(String tableName, Long id) {
+    public int deleteRecord(String tableName, Long id) throws SQLException {
         String query = "DELETE FROM " + tableName + " WHERE id = ?";
-        return jdbcTemplate.update(query, id);
+        return this.dbExecutor.executeNonQuery(query, Map.of("id", id));
     }
 
     // Xóa record
     public int deleteRecord(String tableName, Map<String, Object> primaryKeyValues)
             throws Exception {
-        KMetadata metadata = getMetadataByTableName(tableName);
+        JsonNode metadata = this.getMetadataByTableName(tableName);
         ObjectMapper objectMapper = new ObjectMapper();
         List<String> primaryKeys
-                = objectMapper.readValue(metadata.getColumnPrimarys(), new TypeReference<>() {
+                = objectMapper.readValue(metadata.get("column_primarys").toString(), new TypeReference<>() {
         });
 
         // Xây dựng câu truy vấn `DELETE`
         StringBuilder queryBuilder = new StringBuilder("DELETE FROM " + tableName + " WHERE ");
-        List<Object> params = new ArrayList<>();
+        Map<String, Object> params = new HashMap<>();
 
         primaryKeys.forEach(primaryKey -> {
             queryBuilder.append(primaryKey).append(" = ? AND ");
-            params.add(primaryKeyValues.get(primaryKey));
+            params.put(primaryKey, primaryKeyValues.get(primaryKey));
         });
 
         // Xóa " AND " cuối cùng
         queryBuilder.delete(queryBuilder.length() - 5, queryBuilder.length());
 
         // Thực thi truy vấn
-        int r = jdbcTemplate.update(queryBuilder.toString(), params.toArray());
+        int r = this.dbExecutor.executeNonQuery(queryBuilder.toString(), params);
 
         return r;
 
     }
 }
-
