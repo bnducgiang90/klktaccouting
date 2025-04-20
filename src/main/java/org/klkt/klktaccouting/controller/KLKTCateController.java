@@ -2,7 +2,8 @@ package org.klkt.klktaccouting.controller;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.klkt.klktaccouting.core.database.rdbms.AbstractDatabaseExecutor;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.klkt.klktaccouting.service.KLKTCateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,11 +63,17 @@ public class KLKTCateController {
     }
 
     @GetMapping("/get-tables")
+    @Operation(summary = "Get metadata all tables")
+    @ApiResponse(
+            content = @Content(schema = @Schema(implementation = Object.class))
+    )
     public ResponseEntity<JsonNode> getAllTables() {
         try {
             JsonNode tableMap = klktCateService.getAllTables();
+            LOGGER.info("tableMap: ", tableMap);
             return ResponseEntity.ok(tableMap);
         } catch (Exception e) {
+            LOGGER.error("ERROR:", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((JsonNode) Map.of("error", e.getMessage()));
         }
     }
@@ -89,6 +96,7 @@ public class KLKTCateController {
             List<Map<String, Object>> results = klktCateService.searchRecords(tableName, query);
             return ResponseEntity.ok(results);
         } catch (Exception e) {
+            LOGGER.error("ERROR: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body((List<Map<String, Object>>) Map.of("error", e.getMessage()));
         }
     }

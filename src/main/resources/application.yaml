@@ -1,3 +1,5 @@
+server:
+  port: 8080
 spring:
   application:
     name: klktaccouting
@@ -48,4 +50,11 @@ database:
       poolName: businessdb-pool
       readOnly: false
       driverClassName: org.postgresql.Driver
-
+app:
+  jwt:
+    secret: RrD4X91TgrzsrZjAx3ELoltYweXSrGH/wfHgjBKobcs=
+    expiration:
+      ms: 3600000
+    refresh-token:
+      expiration:
+        ms: 7200000

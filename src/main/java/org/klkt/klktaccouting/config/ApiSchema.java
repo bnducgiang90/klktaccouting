@@ -17,16 +17,3 @@ public record ApiSchema(
         GET, POST, PUT, DELETE, PATCH
     }
 }
-
-//public record ApiSchema(
-//        String api_router,
-//        Method method,
-//        JsonNode schema, // Sử dụng JsonNode thay vì Schema custom
-//        Map<String, Object> example,
-//        Map<String, Object> output_200,
-//        Map<String, Object> output_not_200
-//) {
-//    public enum Method {
-//        GET, POST, PUT, DELETE, PATCH
-//    }
-//}

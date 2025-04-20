@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+//import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -23,6 +26,17 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+
+@io.swagger.v3.oas.annotations.security.SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT",
+        in = SecuritySchemeIn.HEADER
+)
 @Configuration
 public class OpenApiConfig {
 
@@ -33,7 +47,7 @@ public class OpenApiConfig {
     }
 
     @Bean
-    public OpenApiCustomizer openApiCustomizer() throws IOException {
+    public OpenApiCustomizer openApiCustomizer() {
         return openApi -> {
             List<ApiSchema> apiSchemas = null;
             try {
@@ -42,6 +56,22 @@ public class OpenApiConfig {
                 throw new RuntimeException(e);
             }
             apiSchemas.forEach(api -> addCustomPath(openApi, api));
+
+            // ✅ Dùng đúng SecurityScheme từ models
+            // ✅ Tạo SecurityScheme JWT đúng cách
+            io.swagger.v3.oas.models.security.SecurityScheme bearerAuthScheme = new io.swagger.v3.oas.models.security.SecurityScheme()
+                    .type(SecurityScheme.Type.HTTP)
+                    .scheme("bearer")
+                    .bearerFormat("JWT")
+                    .in(SecurityScheme.In.HEADER)
+                    .name("Authorization");
+
+            openApi.components(
+                    new Components().addSecuritySchemes("bearerAuth", bearerAuthScheme)
+            ).addSecurityItem(
+                    new SecurityRequirement().addList("bearerAuth")
+            );
+
         };
     }
 

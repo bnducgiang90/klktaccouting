@@ -5,7 +5,7 @@
     "schema": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "type": "object",
-      "required": ["o_org_id", "id"],
+      "required": ["o_org_id", "id", "nested_data"],
       "properties": {
         "o_org_id": {
           "type": "string",
@@ -21,13 +21,74 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 100
+        },
+        "nested_data": {
+          "type": "object",
+          "required": ["name", "details", "items"],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "details": {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["active", "inactive"]
+                }
+              }
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "item_id": {
+                    "type": "integer"
+                  },
+                  "item_name": {
+                    "type": "string"
+                  },
+                  "attributes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": ["item_id", "item_name"]
+              }
+            }
+          }
         }
       }
     },
     "example": {
       "id": 1,
       "o_org_id": "550e8400-e29b-41d4-a716-446655440000",
-      "u_uuid": "550e8400-e29b-41d4-a716-446655440000"
+      "u_uuid": "550e8400-e29b-41d4-a716-446655440000",
+      "nested_data": {
+        "name": "Category A",
+        "details": {
+          "description": "This is category A",
+          "status": "active"
+        },
+        "items": [
+          {
+            "item_id": 101,
+            "item_name": "Product 1",
+            "attributes": ["color:red", "size:large"]
+          },
+          {
+            "item_id": 102,
+            "item_name": "Product 2",
+            "attributes": ["material:wood"]
+          }
+        ]
+      }
     },
     "output_200": {
       "u_uuid": "3b4b69cd-4894-4a59-b659-80ec4610d644",

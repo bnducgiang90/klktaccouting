@@ -32,8 +32,9 @@ public abstract class AbstractDatabaseExecutor implements IDatabaseExecutor {
             params = Collections.emptyMap();
         }
         try (Connection conn = dataSource.getConnection();
-             CallableStatement stmt = prepareProcedureStatement(conn, procedure, params, false, false)) {
-            stmt.execute();
+             CallableStatement stmt = this.prepareProcedureStatement(conn, procedure, params, false, false)) {
+            LOGGER.info("executeProcedureNonQuery: {}", stmt);
+            stmt.executeUpdate();
         }
     }
 
@@ -45,7 +46,7 @@ public abstract class AbstractDatabaseExecutor implements IDatabaseExecutor {
         }
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
-
+            LOGGER.info("executeNonQuery stmt: {}", stmt);
             setParams(stmt, params);
             return stmt.executeUpdate();
         }
@@ -59,6 +60,7 @@ public abstract class AbstractDatabaseExecutor implements IDatabaseExecutor {
         }
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
+            LOGGER.info("executeQuery stmt: {}", stmt);
             setParams(stmt, params);
             try (ResultSet rs = stmt.executeQuery()) {
                 return mapResultSetToList(rs);
@@ -73,6 +75,7 @@ public abstract class AbstractDatabaseExecutor implements IDatabaseExecutor {
         }
         try (Connection conn = dataSource.getConnection();
              CallableStatement stmt = prepareProcedureStatement(conn, procedure, params, false, true)) {
+            LOGGER.info("executeProcedureWithOutputParams stmt: {}", stmt);
             stmt.execute();
             Map<String, Object> result = new HashMap<>(params);
             result.put("output", stmt.getObject(params.size() + 1));
@@ -86,10 +89,10 @@ public abstract class AbstractDatabaseExecutor implements IDatabaseExecutor {
             params = Collections.emptyMap();
         }
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-
-            setParams(statement, params);
-            try (ResultSet resultSet = statement.executeQuery()) {
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+            LOGGER.info("executeQueryToJson stmt: {}", stmt);
+            setParams(stmt, params);
+            try (ResultSet resultSet = stmt.executeQuery()) {
                 return resultSetToJson(resultSet);
             }
         }

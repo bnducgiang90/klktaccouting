@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -138,28 +139,28 @@ public class KLKTCateService {
             throws Exception {
         JsonNode metadata = this.getMetadataByTableName(tableName);
         ObjectMapper objectMapper = new ObjectMapper();
-        List<String> listColumnsSearch = objectMapper.readValue(metadata.get("column_searchs").toString(), new TypeReference<>() {
-        });
+        List<String> listColumnsSearch = objectMapper.readValue(
+                metadata.get("column_searchs").toString(), new TypeReference<>() {});
 
-        String sql = "SELECT * FROM " + tableName + " WHERE 1=1";
-        Map<String, Object> params = new HashMap<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM " + tableName + " WHERE 1=1");
+        Map<String, Object> paramMap = new LinkedHashMap<>(); // preserve insertion order
 
         if (listColumnsSearch != null && !listColumnsSearch.isEmpty()) {
-            sql += " AND (";
+            sql.append(" AND (");
             for (int i = 0; i < listColumnsSearch.size(); i++) {
                 String column = listColumnsSearch.get(i);
-                sql += column + " ILIKE ?" + i;
-
+                sql.append(column).append(" ILIKE ?");
                 if (i < listColumnsSearch.size() - 1) {
-                    sql += " OR ";
+                    sql.append(" OR ");
                 }
-                params.put(column, "%" + searchQuery + "%");
+                paramMap.put(column, "%" + searchQuery + "%");
             }
-            sql += ")";
+            sql.append(")");
         }
 
-        return this.dbExecutor.executeQuery(sql, params);
+        return this.dbExecutor.executeQuery(sql.toString(), paramMap);
     }
+
 
     // Lấy tất cả record
     public List<Map<String, Object>> getAllRecords(String tableName) throws SQLException {

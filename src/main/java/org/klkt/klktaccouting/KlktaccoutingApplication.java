@@ -11,6 +11,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.security.SecureRandom;
+import java.util.Base64;
+
 
 @EnableConfigurationProperties
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
@@ -22,7 +25,11 @@ public class KlktaccoutingApplication {
 
         ConfigurableApplicationContext context = SpringApplication.run(KlktaccoutingApplication.class, args);
         LOGGER.info("��� KLKTaccouting Application started");
-
+        SecureRandom random = new SecureRandom();
+        byte[] key = new byte[32]; // 32 bytes = 256 bits
+        random.nextBytes(key);
+        String encodedKey = Base64.getEncoder().encodeToString(key);
+        System.out.println("Generated Secret Key: " + encodedKey);
 
 //
 //        // Khởi tạo Database Executors sau khi Spring context đã được tạo
@@ -42,15 +49,15 @@ public class KlktaccoutingApplication {
 //            LOGGER.error("Error initializing database executors: {}", e.getMessage(), e);
 //        }
     }
-
-    @Bean
-    public WebMvcConfigurer webMvcConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addResourceHandlers(ResourceHandlerRegistry registry) {
-                registry.addResourceHandler("/webjars/**")
-                        .addResourceLocations("classpath:/META-INF/resources/webjars/");
-            }
-        };
-    }
+//
+//    @Bean
+//    public WebMvcConfigurer webMvcConfigurer() {
+//        return new WebMvcConfigurer() {
+//            @Override
+//            public void addResourceHandlers(ResourceHandlerRegistry registry) {
+//                registry.addResourceHandler("/webjars/**")
+//                        .addResourceLocations("classpath:/META-INF/resources/webjars/");
+//            }
+//        };
+//    }
 }
