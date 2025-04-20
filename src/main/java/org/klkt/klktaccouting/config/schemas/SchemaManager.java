@@ -1,9 +1,8 @@
-package org.klkt.klktaccouting.core.schemas;
+package org.klkt.klktaccouting.config.schemas;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
-import org.klkt.klktaccouting.service.KLKTCateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

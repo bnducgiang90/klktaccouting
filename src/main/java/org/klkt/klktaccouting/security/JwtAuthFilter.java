@@ -1,5 +1,6 @@
 package org.klkt.klktaccouting.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -33,6 +34,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
             "/api/auth/**",
             "/swagger-ui/**",
+            "/swagger-ui**",
+            "/api/swagger-ui**",
             "/v3/api-docs/**",
             "/api/cate/**"
     );
@@ -58,7 +61,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         try {
             String token = jwtUtils.getTokenFromRequest(request);
-            System.out.println("TOKEN: " + token);
+//            System.out.println("TOKEN: " + token);
 
             // 1. Kiểm tra token có tồn tại không
             if (token == null || token.isBlank()) {
@@ -88,6 +91,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
+            // Sau khi validate token:
+            Map<String, Object> userInfo = jwtUtils.extractUserDetails(token);
+            // Lưu claims vào request attribute để sử dụng ở các lớp sau
+            request.setAttribute("user", userInfo);
+
+
         } catch (ExpiredJwtException e) {
             sendErrorResponse(response, HttpStatus.UNAUTHORIZED.value(), "Token expired");
             return;
@@ -95,6 +104,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             sendErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Authentication failed");
             return;
         }
+
 
         filterChain.doFilter(request, response);
     }

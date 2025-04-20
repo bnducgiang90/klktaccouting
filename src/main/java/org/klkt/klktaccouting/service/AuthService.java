@@ -25,7 +25,6 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
-    private final ObjectMapper objectMapper;
     private final AuthRepository authRepository;
 
     public Map<String, Object> login(Map<String, Object> data) throws Exception {

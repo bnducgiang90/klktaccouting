@@ -1,7 +1,9 @@
-package org.klkt.klktaccouting.security;
+package org.klkt.klktaccouting.config;
 
 
 import lombok.RequiredArgsConstructor;
+import org.klkt.klktaccouting.security.JwtAuthEntryPoint;
+import org.klkt.klktaccouting.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -61,6 +63,8 @@ public class SecurityConfig {
                         auth.requestMatchers(
                                         "/api/auth/**",
                                         "/swagger-ui/**",
+                                        "/swagger-ui**",
+                                        "/api/swagger-ui**",
                                         "/v3/api-docs/**",
                                         "/api/cate/**"
                                 )

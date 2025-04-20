@@ -49,6 +49,20 @@ public class JwtUtils {
         return claimsResolver.apply(claims);
     }
 
+    // Lấy thông tin user từ token (dùng cho các claims custom)
+    public Map<String, Object> extractUserDetails(String token) {
+        return extractClaim(token, claims -> {
+            Map<String, Object> userDetails = new HashMap<>();
+            userDetails.put("uid", claims.get("uid"));
+            userDetails.put("username", claims.get("username"));
+            userDetails.put("email", claims.get("email"));
+            userDetails.put("fullName", claims.get("fullName"));
+            userDetails.put("org_u_id", claims.get("org_u_id"));
+            userDetails.put("tax_code", claims.get("tax_code"));
+            return userDetails;
+        });
+    }
+
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -62,14 +76,15 @@ public class JwtUtils {
     }
 
     public String generateToken(UserDetails userDetails, Map<String, Object> userDto) {
-        System.out.println("userDetails.getUsername(): " + userDetails.getUsername());
-        System.out.println("userDto.get(\"username\"): " + userDto.get("username").toString());
+//        System.out.println("userDetails.getUsername(): " + userDetails.getUsername());
+//        System.out.println("userDto.get(\"username\"): " + userDto.get("username").toString());
         Map<String, Object> claims = new HashMap<>();
         claims.put("uid", userDto.get("u_id"));
+        claims.put("username", userDto.get("username"));
         claims.put("email", userDto.get("email"));
         claims.put("fullName", userDto.get("fullname"));
-        claims.put("orgUId", userDto.get("org_u_id"));
-        claims.put("taxCode", userDto.get("tax_code"));
+        claims.put("org_u_id", userDto.get("org_u_id"));
+        claims.put("tax_code", userDto.get("tax_code"));
 
         return createToken(claims, userDetails.getUsername(), jwtExpirationMs);
     }

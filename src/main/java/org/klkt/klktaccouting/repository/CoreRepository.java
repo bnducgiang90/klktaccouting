@@ -1,6 +1,8 @@
 package org.klkt.klktaccouting.repository;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.klkt.klktaccouting.core.database.rdbms.IDatabaseExecutor;
 import org.klkt.klktaccouting.service.KLKTCateService;
 import org.slf4j.Logger;
@@ -16,17 +18,19 @@ import java.util.function.Supplier;
 
 @DependsOn("databaseExecutorImpl")
 @Repository
-public class AuthRepository {
-    private static final Logger LOGGER = LoggerFactory.getLogger(KLKTCateService.class);
+public class CoreRepository {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CoreRepository.class);
     private final Supplier<IDatabaseExecutor> businessDbExecutor;
+    private final ObjectMapper objectMapper;
 
     private IDatabaseExecutor dbExecutor;
 
     @Autowired
-    public AuthRepository(Supplier<IDatabaseExecutor> businessDbExecutor) {
+    public CoreRepository(Supplier<IDatabaseExecutor> businessDbExecutor, ObjectMapper objectMapper) {
         this.businessDbExecutor = businessDbExecutor;
         this.dbExecutor = this.businessDbExecutor.get();
         LOGGER.info("Using dbExecutor class: {}", this.dbExecutor.getClass().getName());
+        this.objectMapper = objectMapper;
     }
 
     public synchronized IDatabaseExecutor getDbExecutor() {
@@ -36,23 +40,14 @@ public class AuthRepository {
         return dbExecutor;
     }
 
-    public void createUser(Map<String, Object> data) throws Exception {
+    public List<Map<String, Object>> get_list_data_by_user(Map<String, Object> data) throws Exception {
+        String json = this.objectMapper.writeValueAsString(data);
+        List<Map<String, Object>> rs = this.getDbExecutor().executeProcedure(
+                "sp_core_get_list_data_by_user",
+                Map.of("p_params", json)
+        );
 
-        String json = new ObjectMapper().writeValueAsString(data);
-
-        Map<String, Object> params = new LinkedHashMap<>();
-        params.put("p_params", json);
-        this.getDbExecutor().executeProcedureNonQuery("sp_users_insert", params);
-    }
-
-    public Map<String, Object> getUserByUsername(Map<String, Object> data) throws Exception {
-        String json = new ObjectMapper().writeValueAsString(data);
-        Map<String, Object> params = new LinkedHashMap<>();
-        params.put("p_params", json);
-        List<Map<String, Object>> rs = this.getDbExecutor().executeProcedure("sp_users_get_by_username", params);
-        if (rs!=null && rs.size()>0)
-            return rs.get(0);
-        return null;
+        return rs;
     }
 
 }

@@ -1,4 +1,4 @@
-package org.klkt.klktaccouting.config;
+package org.klkt.klktaccouting.config.schemas;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

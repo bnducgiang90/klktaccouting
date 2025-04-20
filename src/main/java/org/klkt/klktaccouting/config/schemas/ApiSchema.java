@@ -1,4 +1,4 @@
-package org.klkt.klktaccouting.config;
+package org.klkt.klktaccouting.config.schemas;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;

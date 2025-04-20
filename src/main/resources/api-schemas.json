@@ -1,5 +1,142 @@
 [
   {
+    "api_router": "/api/auth/register",
+    "method": "POST",
+    "schema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "required": ["username", "password", "email", "org_id", "org_u_id"],
+      "properties": {
+        "username": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "password": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "org_id": {
+          "type": "number",
+          "minimum": 1
+        },
+        "org_u_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 36
+        }
+      }
+    },
+    "example": {
+      "username": "admin@openx.com",
+      "email": "admin@openx.com",
+      "password": "123456",
+      "fullname": "admin",
+      "phone": "101321313",
+      "address": "admin",
+      "citizen_id": "113131321",
+      "org_id": 1,
+      "org_u_id": "c67a2433-7431-4169-877d-442fec11236a",
+      "created_by": "admin"
+    },
+    "output_200": {},
+    "output_not_200": {
+      "error_code": "999",
+      "err_msg": "Error occurred"
+    }
+  },
+  {
+    "api_router": "/api/auth/login",
+    "method": "POST",
+    "schema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "required": ["username", "password"],
+      "properties": {
+        "username": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "password": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      }
+    },
+    "example": {
+      "username": "admin@openx.com",
+      "password": "123456"
+    },
+    "output_200": {},
+    "output_not_200": {
+      "error_code": "999",
+      "err_msg": "Error occurred"
+    }
+  },
+  {
+    "api_router": "/api/auth/refresh-token",
+    "method": "POST",
+    "schema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "required": ["refreshToken"],
+      "properties": {
+        "refreshToken": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "example": {
+      "refreshToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBvcGVueC5jb20iLCJpYXQiOjE3NDUxNTg4MTcsImV4cCI6MTc0NTg3ODgxN30.hsFsytG1Cixu-JMrkQ6IqPpBnAswcU3S9mWmyIYh15A"
+    },
+    "output_200": {},
+    "output_not_200": {
+      "error_code": "999",
+      "err_msg": "Error occurred"
+    }
+  },
+  {
+    "api_router": "/api/core/get-list-data",
+    "method": "POST",
+    "schema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "required": ["table_code"],
+      "properties": {
+        "table_code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 36
+        },
+        "size": {
+          "type": "number"
+        },
+        "page": {
+          "type": "number"
+        }
+      }
+    },
+    "example": {
+      "table_code": "tbldmkhachhang",
+      "size": 25,
+      "page": 1
+    },
+    "output_200": {},
+    "output_not_200": {
+      "error_code": "999",
+      "err_msg": "Error occurred"
+    }
+  },
+  {
     "api_router": "/api/cate/update/{tableName}/{id}",
     "method": "PUT",
     "schema": {

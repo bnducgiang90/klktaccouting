@@ -13,7 +13,10 @@ springdoc:
       email: your.email@example.com
       url: https://example.com
   swagger-ui:
-    path: /swagger-ui/index.html
+    path: /swagger-ui.html
+  server:
+    servlet:
+      context-path: /api
 
 database:
   connections:
@@ -54,7 +57,7 @@ app:
   jwt:
     secret: RrD4X91TgrzsrZjAx3ELoltYweXSrGH/wfHgjBKobcs=
     expiration:
-      ms: 3600000
+      ms: 360000000
     refresh-token:
       expiration:
-        ms: 7200000
+        ms: 720000000
