@@ -41,7 +41,7 @@ database:
       type: postgres
       url: jdbc:postgresql://pg-1bdfb7fc-bnducgiang90-e689.h.aivencloud.com:20545/defaultdb
       username: avnadmin
-      password: AVNS_77HncySd8jtR-oBbnU9
+      password: 
       initializePool: true
 
       maximumPoolSize: 10
