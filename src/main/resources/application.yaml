@@ -39,9 +39,9 @@ database:
 
     - name: businessdb
       type: postgres
-      url: jdbc:postgresql://localhost:5432/postgres
-      username: postgres
-      password: Postgres#123
+      url: jdbc:postgresql://pg-1bdfb7fc-bnducgiang90-e689.h.aivencloud.com:20545/defaultdb
+      username: avnadmin
+      password:
       initializePool: true
 
       maximumPoolSize: 10
