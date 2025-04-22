@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -27,7 +28,8 @@ public class AuthController {
             return ResponseEntity.ok(rs);
         }
         catch (Exception e) {
-           return ResponseEntity.ok(Map.of("error", e));
+           return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e));
+//           return ResponseEntity.ok(Map.of("error", e));
         }
     }
 
@@ -35,6 +37,17 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> refreshToken(@RequestBody Map<String, Object> request) throws Exception {
         Map<String, Object> rs = authService.refreshToken(request);
         return ResponseEntity.ok(rs);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, Object>> logout(@RequestBody Map<String, Object> request) {
+        try {
+            Map<String, Object> rs = authService.logout(request);
+            return ResponseEntity.ok(rs);
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e));
+        }
     }
 
     @PostMapping("/register")

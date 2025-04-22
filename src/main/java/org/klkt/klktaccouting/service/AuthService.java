@@ -1,6 +1,5 @@
 package org.klkt.klktaccouting.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.klkt.klktaccouting.repository.AuthRepository;
 import org.klkt.klktaccouting.security.JwtUtils;
@@ -108,6 +107,26 @@ public class AuthService {
                         "taxCode", userDB.get("tax_code")
                 )
         );
+    }
+
+    public Map<String, Object> logout(Map<String, Object> data) throws Exception {
+        try {
+            return Map.of(
+                    "accessToken", "",
+                    "refreshToken", ""
+            );
+        } catch (BadCredentialsException e) {
+            // Xử lý lỗi đăng nhập sai
+//            return Map.of("error", "Invalid username or password");
+            LOGGER.error("Invalid credentials: ", e);
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Login error: ", e);
+//            // Xử lý lỗi khác (ví dụ: user không tồn tại trong DB)
+//            return Map.of("error", e.getMessage());
+            throw e;
+        }
+
     }
 
     public void register(Map<String, Object> data) {
