@@ -39,4 +39,21 @@ public class CoreController {
         }
     }
 
+    @PostMapping("/upsert-tax-doc")
+    public ResponseEntity<?> upsert_tax_doc(HttpServletRequest request, @RequestBody Map<String, Object> data) {
+        try {
+            Map<String, Object> user_info = (Map<String, Object>)request.getAttribute("user");
+            data.put("user", user_info);
+            LOGGER.info("data: {}", data);
+            List<Map<String, Object>> rs = this.coreService.upsert_tax_doc(data);
+            return ResponseEntity.ok(rs);
+        } catch (ServiceException e) {
+            LOGGER.error("Controller error: get_list_data_by_user failed", e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error: get_list_data_by_user failed", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("System busy, please try again!!!, Internal server error");
+        }
+    }
+
 }
