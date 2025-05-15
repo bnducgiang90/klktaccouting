@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,13 +46,17 @@ public class CoreController {
             Map<String, Object> user_info = (Map<String, Object>)request.getAttribute("user");
             data.put("user", user_info);
             LOGGER.info("data: {}", data);
-            List<Map<String, Object>> rs = this.coreService.upsert_tax_doc(data);
-            return ResponseEntity.ok(rs);
+            Map<String, Object> rs = this.coreService.upsert_tax_doc(data);
+            Map<String, Object> response = new HashMap<>();
+            response.put("errorCode", "000");
+            response.put("errorMessage", "");
+            response.put("data", rs.get("hdr_id"));
+            return ResponseEntity.ok(response);
         } catch (ServiceException e) {
-            LOGGER.error("Controller error: get_list_data_by_user failed", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            LOGGER.error("Controller error: upsert_tax_doc failed", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         } catch (Exception e) {
-            LOGGER.error("Unexpected error: get_list_data_by_user failed", e);
+            LOGGER.error("Unexpected error: upsert_tax_doc failed", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("System busy, please try again!!!, Internal server error");
         }
     }

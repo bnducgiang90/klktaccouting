@@ -73,7 +73,11 @@ public class PostgresExecutor extends AbstractDatabaseExecutor {
         // Nếu có out cursor, thì thêm 1 chỗ cho nó ở đầu
         if (hasOutCursor) {
             sql = "CALL " + procedure + "(" + String.join(",", Collections.nCopies(paramCount + 1, "?")) + ")";
-        } else {
+        }
+        else if (hasOutputParam) {
+            sql = "CALL " + procedure + "(" + String.join(",", Collections.nCopies(paramCount + 1, "?")) + ")";
+        }
+        else {
             sql = "CALL " + procedure + "(" + String.join(",", Collections.nCopies(paramCount, "?")) + ")";
         }
         LOGGER.info("PostgresExecutor - Using procedure: {}", procedure);
@@ -81,6 +85,7 @@ public class PostgresExecutor extends AbstractDatabaseExecutor {
         CallableStatement stmt = conn.prepareCall(sql);
         this.setParams(stmt, params);
         if (hasOutCursor) stmt.registerOutParameter(params.size() + 1, Types.REF_CURSOR);
+        if (hasOutputParam) stmt.registerOutParameter(params.size() + 1  , Types.VARCHAR);
         return stmt;
     }
 

@@ -26,12 +26,12 @@ public class CoreService {
         }
     }
 
-    public List<Map<String, Object>> upsert_tax_doc(Map<String, Object> data) {
+    public Map<String, Object> upsert_tax_doc(Map<String, Object> data) {
         try {
             return coreRepository.upsert_tax_doc(data);
         } catch (Exception e) {
             // Xử lý lỗi không xác định
-            LOGGER.error("Unexpected error in get_list_data_by_user: {}", data, e);
+            LOGGER.error("Unexpected error in upsert_tax_doc: {}", data, e);
             throw new ServiceException("System busy, please try again!!!", e);
         }
     }

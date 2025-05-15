@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 @DependsOn("databaseExecutorImpl")
@@ -51,16 +48,23 @@ public class CoreRepository {
         return rs;
     }
 
-    public List<Map<String, Object>> upsert_tax_doc(Map<String, Object> data) throws Exception {
+    public Map<String, Object> upsert_tax_doc(Map<String, Object> data) throws Exception {
         String json = this.objectMapper.writeValueAsString(data);
-        this.getDbExecutor().executeProcedureNonQuery(
-                "sp_core_insert_tax_docs_by_user",
+//        this.getDbExecutor().executeProcedureNonQuery(
+//                "sp_core_insert_tax_docs_by_user",
+//                Map.of("p_params", json)
+//        );
+
+        Map<String, Object> rs = this.getDbExecutor().executeProcedureWithOutputParams(
+                "sp_core_insert_tax_docs_by_user_output",
                 Map.of("p_params", json)
         );
 
         // Trả về một List chứa Map báo thành công
-        Map<String, Object> result = Map.of("status", "success");
-        return List.of(result);
+        Map<String, Object> result = new HashMap<>();
+        result.put("hdr_id", rs.get("p_output"));
+
+        return result;
     }
 
 }

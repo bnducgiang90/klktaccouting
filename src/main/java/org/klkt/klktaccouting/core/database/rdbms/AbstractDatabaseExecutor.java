@@ -77,8 +77,18 @@ public abstract class AbstractDatabaseExecutor implements IDatabaseExecutor {
              CallableStatement stmt = prepareProcedureStatement(conn, procedure, params, false, true)) {
             LOGGER.info("executeProcedureWithOutputParams stmt: {}", stmt);
             stmt.execute();
-            Map<String, Object> result = new HashMap<>(params);
-            result.put("output", stmt.getObject(params.size() + 1));
+            Map<String, Object> result = new HashMap<>();
+            String  out_data = stmt.getString(params.size() + 1);
+            LOGGER.warn("out_data: {}", out_data);
+            try {
+                JsonNode jsonValue = objectMapper.readTree(out_data);
+                LOGGER.warn("out_data jsonValue: {}", jsonValue);
+                result.put("p_output", jsonValue);
+            } catch (JsonProcessingException e) {
+                LOGGER.error("Lỗi parse JSON cho cột {}", out_data, e);
+                result.put("p_output", out_data); // Giữ nguyên giá trị chuỗi nếu không thể parse
+            }
+
             return result;
         }
     }
