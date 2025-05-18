@@ -60,6 +60,9 @@ public class KLKTCateService {
         List<Map<String, Object>> dropDownColumns =
                 new ObjectMapper().readValue(metadata.get("column_dropdown_sources").toString(), List.class);
 
+        if (dropDownColumns == null) {
+            return new HashMap<>();
+        }
         // Lấy giá trị dropdown từ các bảng khác nhau
         Map<String, List<Map<String, Object>>> dropdownValues = new HashMap<>();
         for (Map<String, Object> column : dropDownColumns) {
@@ -189,8 +192,8 @@ public class KLKTCateService {
         });
         // Xây dựng câu truy vấn `UPDATE`
         StringBuilder queryBuilder = new StringBuilder("UPDATE " + tableName + " SET ");
-        Map<String, Object> params = new HashMap<>();
-
+//        Map<String, Object> params = new HashMap<>();
+        Map<String, Object> params = new LinkedHashMap<>();
         // Thêm các cột cần cập nhật
         data.forEach((key, value) -> {
             if (key != "primaryKeys") {

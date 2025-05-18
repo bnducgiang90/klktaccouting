@@ -140,7 +140,7 @@ public class KLKTCateController {
     public ResponseEntity<String> updateRecord(@PathVariable String tableName, @RequestBody Map<String, Object> recordData) {
         try {
             int result = klktCateService.updateRecord(tableName, recordData);
-            return result > 0 ? ResponseEntity.ok("Updated") : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error");
+            return result > 0 ? ResponseEntity.ok("Updated") : ResponseEntity.ok("No match data update!");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()).toString());
         }
@@ -151,7 +151,7 @@ public class KLKTCateController {
     public ResponseEntity<String> deleteRecord(@PathVariable String tableName, @PathVariable Long id) {
         try {
             int result = klktCateService.deleteRecord(tableName, id);
-            return result > 0 ? ResponseEntity.ok("Deleted") : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error");
+            return result > 0 ? ResponseEntity.ok("Deleted") : ResponseEntity.ok("No match data delete!");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()).toString());
         }

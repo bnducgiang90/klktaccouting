@@ -40,9 +40,11 @@ public class CoreRepository {
 
     public List<Map<String, Object>> get_list_data_by_user(Map<String, Object> data) throws Exception {
         String json = this.objectMapper.writeValueAsString(data);
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put("p_params", json);
         List<Map<String, Object>> rs = this.getDbExecutor().executeProcedure(
                 "sp_core_get_list_data_by_user",
-                Map.of("p_params", json)
+                params
         );
 
         return rs;
@@ -50,15 +52,14 @@ public class CoreRepository {
 
     public Map<String, Object> upsert_tax_doc(Map<String, Object> data) throws Exception {
         String json = this.objectMapper.writeValueAsString(data);
-//        this.getDbExecutor().executeProcedureNonQuery(
-//                "sp_core_insert_tax_docs_by_user",
-//                Map.of("p_params", json)
-//        );
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put("p_params", json);
 
         Map<String, Object> rs = this.getDbExecutor().executeProcedureWithOutputParams(
                 "sp_core_insert_tax_docs_by_user_output",
-                Map.of("p_params", json)
+                params
         );
+        //Map.of("p_params", json)
 
         // Trả về một List chứa Map báo thành công
         Map<String, Object> result = new HashMap<>();
