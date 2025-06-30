@@ -71,5 +71,47 @@ public class CateController {
         }
     }
 
+    @PostMapping("/upsert")
+    public ResponseEntity<?> upsert_cate(HttpServletRequest request, @RequestBody Map<String, Object> data) {
+        try {
+            Map<String, Object> user_info = (Map<String, Object>)request.getAttribute("user");
+            data.put("user", user_info);
+            LOGGER.info("data: {}", data);
+            Map<String, Object> rs = this.cateService.upsert_cate(data);
+            Map<String, Object> response = new HashMap<>();
+            response.put("errorCode", "000");
+            response.put("errorMessage", "");
+            response.put("data", rs.get("hdr_id"));
+            return ResponseEntity.ok(response);
+        } catch (ServiceException e) {
+            LOGGER.error("Controller error: upsert_cate failed", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error: upsert_cate failed", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("System busy, please try again!!!, Internal server error");
+        }
+    }
+
+    @PostMapping("/update-status")
+    public ResponseEntity<?> update_status(HttpServletRequest request, @RequestBody Map<String, Object> data) {
+        try {
+            Map<String, Object> user_info = (Map<String, Object>)request.getAttribute("user");
+            data.put("user", user_info);
+            LOGGER.info("data: {}", data);
+            Map<String, Object> rs = this.cateService.update_status(data);
+            Map<String, Object> response = new HashMap<>();
+            response.put("errorCode", "000");
+            response.put("errorMessage", "");
+            response.put("data", rs.get("hdr_id"));
+            return ResponseEntity.ok(response);
+        } catch (ServiceException e) {
+            LOGGER.error("Controller error: update_status failed", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error: update_status failed", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("System busy, please try again!!!, Internal server error");
+        }
+    }
+
 
 }

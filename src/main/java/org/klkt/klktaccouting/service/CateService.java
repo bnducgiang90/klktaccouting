@@ -26,4 +26,24 @@ public class CateService {
             throw new ServiceException("System busy, please try again!!!", e);
         }
     }
+
+    public Map<String, Object> upsert_cate(Map<String, Object> data) {
+        try {
+            return cateRepository.upsert_cate(data);
+        } catch (Exception e) {
+            // Xử lý lỗi không xác định
+            LOGGER.error("Unexpected error in upsert_tax_doc: {}", data, e);
+            throw new ServiceException("System busy, please try again!!!", e);
+        }
+    }
+
+    public Map<String, Object> update_status(Map<String, Object> data) {
+        try {
+            return cateRepository.update_status(data);
+        } catch (Exception e) {
+            // Xử lý lỗi không xác định
+            LOGGER.error("Unexpected error in upsert_tax_doc: {}", data, e);
+            throw new ServiceException("System busy, please try again!!!", e);
+        }
+    }
 }

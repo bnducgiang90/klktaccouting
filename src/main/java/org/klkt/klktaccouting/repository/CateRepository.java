@@ -46,4 +46,37 @@ public class CateRepository {
 
         return rs;
     }
+
+    public Map<String, Object> upsert_cate(Map<String, Object> data) throws Exception {
+        String json = this.objectMapper.writeValueAsString(data);
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put("p_params", json);
+
+        Map<String, Object> rs = this.getDbExecutor().executeProcedureWithOutputParams(
+                "sp_cate_upsert",
+                params
+        );
+        // Trả về một List chứa Map báo thành công
+        Map<String, Object> result = new HashMap<>();
+        result.put("out_data", rs.get("p_output"));
+
+        return result;
+    }
+
+    public Map<String, Object> update_status(Map<String, Object> data) throws Exception {
+        String json = this.objectMapper.writeValueAsString(data);
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put("p_params", json);
+
+        Map<String, Object> rs = this.getDbExecutor().executeProcedureWithOutputParams(
+                "sp_cate_update_status",
+                params
+        );
+        // Trả về một List chứa Map báo thành công
+        Map<String, Object> result = new HashMap<>();
+        result.put("out_data", rs.get("p_output"));
+
+        return result;
+    }
+
 }
