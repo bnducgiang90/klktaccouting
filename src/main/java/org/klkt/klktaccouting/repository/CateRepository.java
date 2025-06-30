@@ -1,6 +1,5 @@
 package org.klkt.klktaccouting.repository;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.klkt.klktaccouting.core.database.rdbms.IDatabaseExecutor;
 import org.slf4j.Logger;
@@ -14,7 +13,7 @@ import java.util.function.Supplier;
 
 @DependsOn("databaseExecutorImpl")
 @Repository
-public class CoreRepository {
+public class CateRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(CoreRepository.class);
     private final Supplier<IDatabaseExecutor> businessDbExecutor;
     private final ObjectMapper objectMapper;
@@ -22,7 +21,7 @@ public class CoreRepository {
     private IDatabaseExecutor dbExecutor;
 
     @Autowired
-    public CoreRepository(Supplier<IDatabaseExecutor> businessDbExecutor, ObjectMapper objectMapper) {
+    public CateRepository(Supplier<IDatabaseExecutor> businessDbExecutor, ObjectMapper objectMapper) {
         this.businessDbExecutor = businessDbExecutor;
         this.dbExecutor = this.businessDbExecutor.get();
         LOGGER.info("Using dbExecutor class: {}", this.dbExecutor.getClass().getName());
@@ -36,36 +35,15 @@ public class CoreRepository {
         return dbExecutor;
     }
 
-    public List<Map<String, Object>> get_list_data_by_user(Map<String, Object> data) throws Exception {
+    public List<Map<String, Object>> get_list_cate_search(Map<String, Object> data) throws Exception {
         String json = this.objectMapper.writeValueAsString(data);
         Map<String, Object> params = new LinkedHashMap<>();
         params.put("p_params", json);
         List<Map<String, Object>> rs = this.getDbExecutor().executeProcedure(
-                "sp_core_get_list_data_by_user",
+                "sp_cate_search",
                 params
         );
 
         return rs;
     }
-
-    public Map<String, Object> upsert_tax_doc(Map<String, Object> data) throws Exception {
-        String json = this.objectMapper.writeValueAsString(data);
-        Map<String, Object> params = new LinkedHashMap<>();
-        params.put("p_params", json);
-
-        Map<String, Object> rs = this.getDbExecutor().executeProcedureWithOutputParams(
-                "sp_core_insert_tax_docs_by_user_output",
-                params
-        );
-        //Map.of("p_params", json)
-
-        // Trả về một List chứa Map báo thành công
-        Map<String, Object> result = new HashMap<>();
-        result.put("hdr_id", rs.get("p_output"));
-
-        return result;
-    }
-
-
-
 }
