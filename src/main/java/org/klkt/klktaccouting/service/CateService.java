@@ -27,6 +27,16 @@ public class CateService {
         }
     }
 
+    public List<Map<String, Object>> get_list_cate_data(Map<String, Object> data) {
+        try {
+            return cateRepository.get_list_cate_data(data);
+        } catch (Exception e) {
+            // Xử lý lỗi không xác định
+            LOGGER.error("Unexpected error in get_list_cate_data: {}", data, e);
+            throw new ServiceException("System busy, please try again!!!", e);
+        }
+    }
+
     public Map<String, Object> upsert_cate(Map<String, Object> data) {
         try {
             return cateRepository.upsert_cate(data);

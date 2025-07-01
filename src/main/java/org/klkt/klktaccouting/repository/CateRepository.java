@@ -35,6 +35,18 @@ public class CateRepository {
         return dbExecutor;
     }
 
+    public List<Map<String, Object>> get_list_cate_data(Map<String, Object> data) throws Exception {
+        String json = this.objectMapper.writeValueAsString(data);
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put("p_params", json);
+        List<Map<String, Object>> rs = this.getDbExecutor().executeProcedure(
+                "sp_cate_get_list_data",
+                params
+        );
+
+        return rs;
+    }
+
     public List<Map<String, Object>> get_list_cate_search(Map<String, Object> data) throws Exception {
         String json = this.objectMapper.writeValueAsString(data);
         Map<String, Object> params = new LinkedHashMap<>();
