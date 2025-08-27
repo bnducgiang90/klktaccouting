@@ -91,4 +91,48 @@ public class CateRepository {
         return result;
     }
 
+    public Map<String, Object> dmtaikhoan_update_balance(Map<String, Object> data) throws Exception {
+        String json = this.objectMapper.writeValueAsString(data);
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put("p_params", json);
+
+        Map<String, Object> rs = this.getDbExecutor().executeProcedureWithOutputParams(
+                "sp_tbldmtaikhoan_update_balance",
+                params
+        );
+        // Trả về một List chứa Map báo thành công
+        Map<String, Object> result = new HashMap<>();
+        result.put("out_data", rs.get("p_output"));
+
+        return result;
+    }
+
+    public List<Map<String, Object>> dmtaikhoan_chitiet_get_balance(Map<String, Object> data) throws Exception {
+        String json = this.objectMapper.writeValueAsString(data);
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put("p_params", json);
+        List<Map<String, Object>> rs = this.getDbExecutor().executeProcedure(
+                "sp_tbldmtaikhoan_chitiet_get_balance",
+                params
+        );
+
+        return rs;
+    }
+
+    public Map<String, Object> update(Map<String, Object> data) throws Exception {
+        String json = this.objectMapper.writeValueAsString(data);
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put("p_params", json);
+
+        Map<String, Object> rs = this.getDbExecutor().executeProcedureWithOutputParams(
+                "sp_cate_update",
+                params
+        );
+        // Trả về một List chứa Map báo thành công
+        Map<String, Object> result = new HashMap<>();
+        result.put("out_data", rs.get("p_output"));
+
+        return result;
+    }
+
 }

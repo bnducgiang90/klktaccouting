@@ -56,4 +56,34 @@ public class CateService {
             throw new ServiceException("System busy, please try again!!!", e);
         }
     }
+
+    public Map<String, Object> dmtaikhoan_update_balance(Map<String, Object> data) {
+        try {
+            return cateRepository.dmtaikhoan_update_balance(data);
+        } catch (Exception e) {
+            // Xử lý lỗi không xác định
+            LOGGER.error("Unexpected error in dmtaikhoan_update_balance: {}", data, e);
+            throw new ServiceException("System busy, please try again!!!", e);
+        }
+    }
+
+    public List<Map<String, Object>> dmtaikhoan_chitiet_get_balance(Map<String, Object> data) {
+        try {
+            return cateRepository.dmtaikhoan_chitiet_get_balance(data);
+        } catch (Exception e) {
+            // Xử lý lỗi không xác định
+            LOGGER.error("Unexpected error in dmtaikhoan_chitiet_get_balance: {}", data, e);
+            throw new ServiceException("System busy, please try again!!!", e);
+        }
+    }
+
+    public Map<String, Object> update(Map<String, Object> data) {
+        try {
+            return cateRepository.update(data);
+        } catch (Exception e) {
+            // Xử lý lỗi không xác định
+            LOGGER.error("Unexpected error in update: {}", data, e);
+            throw new ServiceException("System busy, please try again!!!", e);
+        }
+    }
 }
