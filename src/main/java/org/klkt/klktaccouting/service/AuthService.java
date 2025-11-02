@@ -43,6 +43,8 @@ public class AuthService {
             if (userDB == null) {
                 throw new RuntimeException("User not found!!!");
             }
+            userDB.put("financialYear", data.get("financialYear"));
+            userDB.put("mst", data.get("mst"));
 
             // Generate tokens
             String accessToken = jwtUtils.generateToken(userDetails, userDB);

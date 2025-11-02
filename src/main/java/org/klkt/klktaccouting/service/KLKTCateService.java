@@ -47,7 +47,7 @@ public class KLKTCateService {
     }
 
     public JsonNode getAllTables() throws SQLException {
-        JsonNode jsonNode = this.dbExecutor.executeQueryToJson("select * from k_metadata", null);
+        JsonNode jsonNode = this.dbExecutor.executeQueryToJson("select * from k_metadata where status = 1", null);
         return jsonNode;
     }
 

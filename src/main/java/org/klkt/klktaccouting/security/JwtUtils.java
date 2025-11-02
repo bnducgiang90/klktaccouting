@@ -59,6 +59,7 @@ public class JwtUtils {
             userDetails.put("fullName", claims.get("fullName"));
             userDetails.put("org_u_id", claims.get("org_u_id"));
             userDetails.put("tax_code", claims.get("tax_code"));
+            userDetails.put("financialYear", claims.get("financialYear"));
             return userDetails;
         });
     }
@@ -85,6 +86,7 @@ public class JwtUtils {
         claims.put("fullName", userDto.get("fullname"));
         claims.put("org_u_id", userDto.get("org_u_id"));
         claims.put("tax_code", userDto.get("tax_code"));
+        claims.put("financialYear", userDto.get("financialYear"));
 
         return createToken(claims, userDetails.getUsername(), jwtExpirationMs);
     }
