@@ -54,9 +54,9 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ dùng style mới
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource())) // dùng style mới
                 .csrf(csrf -> csrf.disable())
-                 .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
@@ -81,7 +81,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:9527")); // 🎯 frontend port đúng
+        config.setAllowedOrigins(List.of("http://localhost:9527", "https://ketoanquangninh2026.github.io")); // frontend port đúng
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
